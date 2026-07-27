@@ -101,7 +101,9 @@ jobs:
                la última versión del issue. Aplica los labels con:
                gh issue edit ${{ github.event.issue.number }} --repo ${{ github.repository }} --add-label "..." [--remove-label "..."]
 
-            4. DIAGNOSTICAR: redacta un comentario en Markdown con esta estructura exacta:
+            4. DIAGNOSTICAR: redacta un comentario en formato Markdown compatible con el renderizado
+               de GitHub (encabezados, negritas, listas, bloques de código con acento grave, etc.,
+               tal y como GitHub los interpreta en issues y comentarios) con esta estructura exacta:
 
                <!-- claude-issue-triage -->
                ## 🔍 Diagnóstico automático

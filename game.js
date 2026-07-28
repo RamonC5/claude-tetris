@@ -35,6 +35,79 @@ const THEME_COLORS = {
   light: { grid: '#c5c9dc', highlight: 'rgba(255,255,255,0.4)' },
 };
 
+function clampChannel(v) {
+  return Math.max(0, Math.min(255, v));
+}
+
+// Simple RGB-based lighten/darken helper for hex colors (no external libs).
+// amount is in [0,1]: lighten mixes toward white, darken mixes toward black.
+function lighten(hex, amount) {
+  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if (!m) return hex;
+  const r = parseInt(m[1], 16), g = parseInt(m[2], 16), b = parseInt(m[3], 16);
+  const nr = clampChannel(Math.round(r + (255 - r) * amount));
+  const ng = clampChannel(Math.round(g + (255 - g) * amount));
+  const nb = clampChannel(Math.round(b + (255 - b) * amount));
+  return `#${nr.toString(16).padStart(2, '0')}${ng.toString(16).padStart(2, '0')}${nb.toString(16).padStart(2, '0')}`;
+}
+
+function darken(hex, amount) {
+  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if (!m) return hex;
+  const r = parseInt(m[1], 16), g = parseInt(m[2], 16), b = parseInt(m[3], 16);
+  const nr = clampChannel(Math.round(r * (1 - amount)));
+  const ng = clampChannel(Math.round(g * (1 - amount)));
+  const nb = clampChannel(Math.round(b * (1 - amount)));
+  return `#${nr.toString(16).padStart(2, '0')}${ng.toString(16).padStart(2, '0')}${nb.toString(16).padStart(2, '0')}`;
+}
+
+const SKINS = {
+  retro: {
+    colors: COLORS,
+    background: null,
+    grid: null, // uses THEME_COLORS[theme].grid
+    highlight: null, // uses THEME_COLORS[theme].highlight
+  },
+  neon: {
+    colors: [
+      null,
+      '#00f0ff', // I - electric cyan
+      '#faff00', // O - electric yellow
+      '#e100ff', // T - magenta
+      '#39ff14', // S - neon green
+      '#ff073a', // Z - neon red
+      '#1b8bff', // J - electric blue
+      '#ff9500', // L - neon orange
+      '#e0e0e0', // N - bright silver
+    ],
+    background: '#000000',
+    grid: 'rgba(255,255,255,0.06)',
+    highlight: 'rgba(255,255,255,0.5)',
+  },
+  pastel: {
+    colors: [
+      null,
+      '#a8e0e6', // I
+      '#f6e5a3', // O
+      '#d8b6e0', // T
+      '#b6dfb2', // S
+      '#f2b3ae', // Z
+      '#b6cdf2', // J
+      '#f3cfa3', // L
+      '#d6d9e0', // N
+    ],
+    background: null,
+    grid: THEME_COLORS.light.grid,
+    highlight: 'rgba(255,255,255,0.6)',
+  },
+  pixel: {
+    colors: COLORS,
+    background: null,
+    grid: null, // uses THEME_COLORS[theme].grid
+    highlight: null, // uses THEME_COLORS[theme].highlight
+  },
+};
+
 const canvas = document.getElementById('board');
 const ctx = canvas.getContext('2d');
 const nextCanvas = document.getElementById('next-canvas');
@@ -50,6 +123,7 @@ const themeSwitch = document.getElementById('theme-switch');
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
 let theme = localStorage.getItem('tetris-theme') === 'light' ? 'light' : 'dark';
+let skin = 'retro';
 
 function createBoard() {
   return Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
@@ -165,20 +239,85 @@ function updateHUD() {
   levelEl.textContent = level;
 }
 
+function currentSkin() {
+  return SKINS[skin] || SKINS.retro;
+}
+
+function skinGridColor() {
+  return currentSkin().grid || THEME_COLORS[theme].grid;
+}
+
+function skinHighlightColor() {
+  return currentSkin().highlight || THEME_COLORS[theme].highlight;
+}
+
 function drawBlock(context, x, y, colorIndex, size, alpha) {
   if (!colorIndex) return;
-  const color = COLORS[colorIndex];
+  const activeSkin = currentSkin();
+  const color = activeSkin.colors[colorIndex];
+  const px = x * size + 1;
+  const py = y * size + 1;
+  const w = size - 2;
+  const h = size - 2;
+
   context.globalAlpha = alpha ?? 1;
-  context.fillStyle = color;
-  context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
-  // highlight
-  context.fillStyle = THEME_COLORS[theme].highlight;
-  context.fillRect(x * size + 1, y * size + 1, size - 2, 4);
+
+  if (skin === 'neon') {
+    context.shadowBlur = 12;
+    context.shadowColor = color;
+    context.fillStyle = color;
+    context.fillRect(px, py, w, h);
+    // reset immediately so the glow doesn't bleed into later draw calls
+    // (grid lines, text, other canvases) in this frame.
+    context.shadowBlur = 0;
+    context.shadowColor = 'transparent';
+    context.fillStyle = skinHighlightColor();
+    context.fillRect(px, py, w, 4);
+  } else if (skin === 'pastel') {
+    const radius = 5;
+    context.fillStyle = color;
+    if (typeof context.roundRect === 'function') {
+      context.beginPath();
+      context.roundRect(px, py, w, h, radius);
+      context.fill();
+    } else {
+      // fallback: fake rounding by insetting corners slightly
+      context.fillRect(px + 1, py, w - 2, h);
+      context.fillRect(px, py + 1, w, h - 2);
+    }
+    // softer/thinner highlight strip
+    context.fillStyle = skinHighlightColor();
+    context.fillRect(px + 2, py + 1, w - 4, 2);
+  } else if (skin === 'pixel') {
+    context.fillStyle = color;
+    context.fillRect(px, py, w, h);
+    // cheap dithered pixel-art texture: alternating lighter/darker sub-rects
+    const light = lighten(color, 0.25);
+    const dark = darken(color, 0.25);
+    const halfW = w / 2;
+    const halfH = h / 2;
+    context.fillStyle = light;
+    context.fillRect(px, py, halfW, halfH);
+    context.fillRect(px + halfW, py + halfH, w - halfW, h - halfH);
+    context.fillStyle = dark;
+    context.fillRect(px + halfW, py, w - halfW, halfH);
+    context.fillRect(px, py + halfH, halfW, h - halfH);
+    // highlight strip on top
+    context.fillStyle = skinHighlightColor();
+    context.fillRect(px, py, w, 4);
+  } else {
+    // retro (default / fallback)
+    context.fillStyle = color;
+    context.fillRect(px, py, w, h);
+    context.fillStyle = skinHighlightColor();
+    context.fillRect(px, py, w, 4);
+  }
+
   context.globalAlpha = 1;
 }
 
 function drawGrid() {
-  ctx.strokeStyle = THEME_COLORS[theme].grid;
+  ctx.strokeStyle = skinGridColor();
   ctx.lineWidth = 0.5;
   for (let c = 1; c < COLS; c++) {
     ctx.beginPath();
@@ -195,7 +334,14 @@ function drawGrid() {
 }
 
 function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const bg = currentSkin().background;
+  if (bg) {
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  } else {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
   drawGrid();
 
   // board
@@ -218,7 +364,14 @@ function draw() {
 
 function drawNext() {
   const NB = 30;
-  nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+  const bg = currentSkin().background;
+  if (bg) {
+    nextCtx.globalAlpha = 1;
+    nextCtx.fillStyle = bg;
+    nextCtx.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
+  } else {
+    nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+  }
   const shape = next.shape;
   const offX = Math.floor((4 - shape[0].length) / 2);
   const offY = Math.floor((4 - shape.length) / 2);

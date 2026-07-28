@@ -241,3 +241,90 @@ kbd {
 #restart-btn:hover {
   background: var(--restart-hover);
 }
+
+/* ---- Entrada de nombre (top 5) ---- */
+.name-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.name-form.hidden {
+  display: none;
+}
+
+#name-input {
+  background: var(--kbd-bg);
+  border: 1px solid var(--kbd-border);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  width: 120px;
+  outline: none;
+}
+
+#name-input:focus {
+  border-color: var(--value-color);
+}
+
+#save-score-btn {
+  background: var(--restart-bg);
+  color: var(--restart-text);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: background 0.15s;
+}
+
+#save-score-btn:hover {
+  background: var(--restart-hover);
+}
+
+/* ---- Panel de puntuaciones ---- */
+#records-panel {
+  width: 100%;
+}
+
+#records-panel:empty {
+  display: none;
+}
+
+.records-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 12px;
+}
+
+.records-table th {
+  color: var(--label-color);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-align: left;
+  padding: 2px 6px;
+  font-weight: 600;
+}
+
+.records-table td {
+  color: var(--text);
+  padding: 3px 6px;
+  text-align: left;
+}
+
+.records-table tr.highlight td {
+  color: var(--overlay-score-color);
+  font-weight: 700;
+  background: rgba(122, 162, 247, 0.15);
+  border-radius: 4px;
+}
+
+.records-empty {
+  font-size: 12px;
+  color: var(--controls-text);
+}

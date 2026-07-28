@@ -56,7 +56,33 @@
       <div class="overlay-box">
         <p id="overlay-title">GAME OVER</p>
         <p id="overlay-score"></p>
-        <button id="restart-btn">Reiniciar</button>
+
+        <div id="gameover-actions" class="hidden">
+          <button id="restart-btn" class="menu-btn">Reiniciar</button>
+        </div>
+
+        <div id="pause-menu" class="pause-menu hidden">
+          <div id="pause-view-main" class="pause-view">
+            <button id="resume-btn" class="menu-btn">Reanudar</button>
+            <button id="pause-restart-btn" class="menu-btn">Reiniciar</button>
+            <button id="controls-btn" class="menu-btn secondary">Ver controles</button>
+            <div class="level-select-row">
+              <label for="start-level-select">Nivel inicial</label>
+              <select id="start-level-select" aria-label="Nivel inicial"></select>
+            </div>
+          </div>
+
+          <div id="pause-view-controls" class="pause-view hidden">
+            <ul class="pause-controls-list">
+              <li><kbd>←</kbd><kbd>→</kbd> mover</li>
+              <li><kbd>↑</kbd> rotar</li>
+              <li><kbd>↓</kbd> bajar</li>
+              <li><kbd>Space</kbd> caída</li>
+              <li><kbd>P</kbd> pausa</li>
+            </ul>
+            <button id="back-btn" class="menu-btn secondary">Volver</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

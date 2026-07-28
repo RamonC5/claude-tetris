@@ -22,6 +22,13 @@
   --restart-bg: #7aa2f7;
   --restart-text: #0f0f17;
   --restart-hover: #9bbdff;
+  --menu-btn-secondary-bg: #22223a;
+  --menu-btn-secondary-text: #e0e0e0;
+  --menu-btn-secondary-hover: #2c2c4a;
+  --menu-select-bg: #1a1a25;
+  --menu-select-border: #3a3a5a;
+  --menu-row-bg: #16161f;
+  --menu-row-border: #2a2a3a;
 }
 
 body.light-theme {
@@ -42,6 +49,13 @@ body.light-theme {
   --restart-bg: #3355c9;
   --restart-text: #ffffff;
   --restart-hover: #4d6fe0;
+  --menu-btn-secondary-bg: #e2e4f0;
+  --menu-btn-secondary-text: #1c1c26;
+  --menu-btn-secondary-hover: #d3d6ea;
+  --menu-select-bg: #ffffff;
+  --menu-select-border: #c5c9dc;
+  --menu-row-bg: #f5f6fb;
+  --menu-row-border: #c5c9dc;
 }
 
 body {
@@ -209,6 +223,7 @@ kbd {
   flex-direction: column;
   gap: 12px;
   align-items: center;
+  max-width: 240px;
 }
 
 #overlay-title {
@@ -224,8 +239,19 @@ kbd {
   color: var(--overlay-score-color);
 }
 
-#restart-btn {
+#gameover-actions {
+  display: flex;
+  flex-direction: column;
+  width: 210px;
+}
+
+#gameover-actions.hidden {
+  display: none;
+}
+
+.menu-btn {
   margin-top: 8px;
+  width: 100%;
   background: var(--restart-bg);
   color: var(--restart-text);
   border: none;
@@ -238,6 +264,68 @@ kbd {
   transition: background 0.15s;
 }
 
-#restart-btn:hover {
+.menu-btn:hover {
   background: var(--restart-hover);
+}
+
+.menu-btn.secondary {
+  background: var(--menu-btn-secondary-bg);
+  color: var(--menu-btn-secondary-text);
+}
+
+.menu-btn.secondary:hover {
+  background: var(--menu-btn-secondary-hover);
+}
+
+/* ---- Menú de pausa ---- */
+.pause-menu.hidden,
+.pause-view.hidden {
+  display: none;
+}
+
+.pause-view {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+  width: 210px;
+}
+
+.level-select-row {
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--controls-text);
+  background: var(--menu-row-bg);
+  border: 1px solid var(--menu-row-border);
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+.level-select-row select {
+  background: var(--menu-select-bg);
+  color: var(--text);
+  border: 1px solid var(--menu-select-border);
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 13px;
+}
+
+.pause-controls-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+
+.pause-controls-list li {
+  font-size: 13px;
+  color: var(--controls-text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }

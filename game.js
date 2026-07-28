@@ -47,9 +47,69 @@ const overlayTitle = document.getElementById('overlay-title');
 const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
 const themeSwitch = document.getElementById('theme-switch');
+const startScreen = document.getElementById('start-screen');
+const startRecordsPanel = document.getElementById('start-records-panel');
+const playBtn = document.getElementById('play-btn');
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
 let theme = localStorage.getItem('tetris-theme') === 'light' ? 'light' : 'dark';
+let started = false;
+
+// ---- Records ----
+const RECORDS_KEY = 'tetris-highscores';
+
+function loadRecords() {
+  try {
+    const raw = localStorage.getItem(RECORDS_KEY);
+    if (!raw) return { scores: [], bestCombo: 0, maxLines: 0 };
+    const parsed = JSON.parse(raw);
+    return {
+      scores: Array.isArray(parsed.scores) ? parsed.scores : [],
+      bestCombo: typeof parsed.bestCombo === 'number' ? parsed.bestCombo : 0,
+      maxLines: typeof parsed.maxLines === 'number' ? parsed.maxLines : 0,
+    };
+  } catch (err) {
+    return { scores: [], bestCombo: 0, maxLines: 0 };
+  }
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function renderRecords(containerEl) {
+  if (!containerEl) return;
+  const data = loadRecords();
+  const top5 = [...data.scores]
+    .sort((a, b) => (b.score || 0) - (a.score || 0))
+    .slice(0, 5);
+
+  let html = '';
+  if (top5.length === 0) {
+    html += '<p class="no-records">Aún no hay récords. ¡Sé el primero!</p>';
+  } else {
+    html += '<table><thead><tr>' +
+      '<th>#</th><th>Nombre</th><th>Score</th><th>Líneas</th><th>Nivel</th>' +
+      '</tr></thead><tbody>';
+    top5.forEach((rec, i) => {
+      const name = escapeHtml(rec && rec.name ? String(rec.name) : '---');
+      const recScore = rec && typeof rec.score === 'number' ? rec.score.toLocaleString() : 0;
+      const recLines = rec && typeof rec.lines === 'number' ? rec.lines : 0;
+      const recLevel = rec && typeof rec.level === 'number' ? rec.level : 1;
+      html += `<tr><td>${i + 1}</td><td>${name}</td><td>${recScore}</td><td>${recLines}</td><td>${recLevel}</td></tr>`;
+    });
+    html += '</tbody></table>';
+  }
+
+  html += `<div class="records-stats">` +
+    `<span>Mejor combo: ${data.bestCombo}</span>` +
+    `<span>Máx. líneas: ${data.maxLines}</span>` +
+    `</div>`;
+
+  containerEl.innerHTML = html;
+}
 
 function createBoard() {
   return Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
@@ -238,8 +298,8 @@ function endGame() {
 function applyTheme() {
   document.body.classList.toggle('light-theme', theme === 'light');
   themeSwitch.checked = theme === 'light';
-  draw();
-  drawNext();
+  if (board && current) draw();
+  if (next) drawNext();
 }
 
 function toggleTheme() {
@@ -298,7 +358,21 @@ function init() {
   animId = requestAnimationFrame(loop);
 }
 
+function startGame() {
+  if (started) return;
+  started = true;
+  startScreen.classList.add('hidden');
+  init();
+}
+
 document.addEventListener('keydown', e => {
+  if (!started) {
+    if (e.code === 'Enter' || e.code === 'Space') {
+      e.preventDefault();
+      startGame();
+    }
+    return;
+  }
   if (e.code === 'KeyP') { togglePause(); return; }
   if (paused || gameOver) return;
   switch (e.code) {
@@ -325,5 +399,7 @@ document.addEventListener('keydown', e => {
 
 restartBtn.addEventListener('click', init);
 themeSwitch.addEventListener('change', toggleTheme);
+playBtn.addEventListener('click', startGame);
 
-init();
+applyTheme();
+renderRecords(startRecordsPanel);

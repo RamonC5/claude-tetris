@@ -241,3 +241,77 @@ kbd {
 #restart-btn:hover {
   background: var(--restart-hover);
 }
+
+/* ---- Start screen ---- */
+#start-title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 6px;
+  color: var(--title-color);
+}
+
+#start-subtitle {
+  font-size: 14px;
+  color: var(--controls-text);
+  margin-top: -6px;
+}
+
+#start-records-panel {
+  width: 100%;
+  min-width: 220px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 13px;
+  color: var(--text);
+}
+
+#start-records-panel table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 8px;
+}
+
+#start-records-panel th,
+#start-records-panel td {
+  padding: 3px 6px;
+  text-align: left;
+}
+
+#start-records-panel th {
+  color: var(--label-color);
+  font-size: 11px;
+  letter-spacing: 1px;
+  border-bottom: 1px solid var(--kbd-border);
+}
+
+#start-records-panel .no-records {
+  color: var(--controls-text);
+  font-size: 12px;
+  text-align: center;
+  padding: 6px 0;
+}
+
+#start-records-panel .records-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12px;
+  color: var(--value-color);
+}
+
+#play-btn {
+  margin-top: 8px;
+  background: var(--restart-bg);
+  color: var(--restart-text);
+  border: none;
+  border-radius: 6px;
+  padding: 10px 28px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: background 0.15s;
+}
+
+#play-btn:hover {
+  background: var(--restart-hover);
+}

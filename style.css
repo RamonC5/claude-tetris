@@ -241,3 +241,76 @@ kbd {
 #restart-btn:hover {
   background: var(--restart-hover);
 }
+
+/* ---- Records ---- */
+#records-panel {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.records-title {
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--overlay-title-color);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.records-table {
+  border-collapse: collapse;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 12px;
+  color: var(--overlay-score-color);
+}
+
+.records-table th,
+.records-table td {
+  padding: 3px 8px;
+  text-align: center;
+}
+
+.records-table thead th {
+  color: var(--label-color);
+  font-size: 10px;
+  letter-spacing: 1px;
+  border-bottom: 1px solid var(--board-border);
+}
+
+.records-table tbody tr.highlight {
+  background: rgba(122, 162, 247, 0.18);
+  border: 1px solid var(--restart-bg);
+  border-radius: 4px;
+}
+
+.records-empty {
+  font-size: 12px;
+  color: var(--controls-text);
+}
+
+.records-stat {
+  font-size: 12px;
+  color: var(--overlay-score-color);
+  font-family: 'Courier New', Courier, monospace;
+}
+
+#reset-records-btn {
+  margin-top: 4px;
+  background: transparent;
+  color: var(--overlay-title-color);
+  border: 1px solid var(--overlay-title-color);
+  border-radius: 6px;
+  padding: 6px 18px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: background 0.15s, color 0.15s;
+}
+
+#reset-records-btn:hover {
+  background: var(--overlay-title-color);
+  color: var(--restart-text);
+}

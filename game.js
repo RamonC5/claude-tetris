@@ -117,6 +117,7 @@ const nextCtx = nextCanvas.getContext('2d');
 const scoreEl = document.getElementById('score');
 const linesEl = document.getElementById('lines');
 const levelEl = document.getElementById('level');
+const comboEl = document.getElementById('combo');
 const overlay = document.getElementById('overlay');
 const overlayTitle = document.getElementById('overlay-title');
 const overlayScore = document.getElementById('overlay-score');
@@ -187,6 +188,11 @@ function populateStartLevelSelect() {
 }
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
+// Combo / stats tracking: `combo` counts consecutive locks that clear at least one line
+// (reset to 0 the moment a lock clears zero lines). `maxCombo` and `maxLinesAtOnce`
+// hold the best values reached during the current game; exposed at module scope so
+// other units (e.g. high-score persistence) can read them on game over.
+let combo, maxCombo, maxLinesAtOnce;
 let theme = safeGetItem('tetris-theme') === 'light' ? 'light' : 'dark';
 let started = false;
 
@@ -259,12 +265,17 @@ function clearLines() {
     }
   }
   if (cleared) {
+    combo++;
+    maxCombo = Math.max(maxCombo, combo);
+    maxLinesAtOnce = Math.max(maxLinesAtOnce, cleared);
     lines += cleared;
     score += (LINE_SCORES[cleared] || 0) * level;
     level = Math.floor(lines / 10) + 1;
     dropInterval = Math.max(100, 1000 - (level - 1) * 90);
-    updateHUD();
+  } else {
+    combo = 0;
   }
+  updateHUD();
 }
 
 function ghostY() {
@@ -309,6 +320,7 @@ function updateHUD() {
   scoreEl.textContent = score.toLocaleString();
   linesEl.textContent = lines;
   levelEl.textContent = level;
+  comboEl.textContent = combo;
 }
 
 function currentSkin() {
@@ -577,7 +589,10 @@ function endGame() {
   gameOver = true;
   cancelAnimationFrame(animId);
   overlayTitle.textContent = 'GAME OVER';
-  overlayScore.textContent = `Puntuación: ${score.toLocaleString()}`;
+  overlayScore.innerHTML =
+    `Puntuación: ${score.toLocaleString()}<br>` +
+    `Combo máximo: ${maxCombo}<br>` +
+    `Mejor jugada: ${maxLinesAtOnce} línea${maxLinesAtOnce === 1 ? '' : 's'}`;
   pauseMenu.classList.add('hidden');
   gameoverActions.classList.remove('hidden');
   overlay.classList.remove('hidden');
@@ -718,6 +733,9 @@ function init() {
   score = 0;
   lines = 0;
   level = getStartLevel();
+  combo = 0;
+  maxCombo = 0;
+  maxLinesAtOnce = 0;
   paused = false;
   gameOver = false;
   dropInterval = Math.max(100, 1000 - (level - 1) * 90);

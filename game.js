@@ -30,6 +30,53 @@ const PIECES = [
 
 const LINE_SCORES = [0, 100, 300, 500, 800];
 
+const SKINS = {
+  retro: {
+    colors: [null, ...COLORS.slice(1)],
+  },
+  neon: {
+    colors: [
+      null,
+      '#00e5ff', // I
+      '#ffee00', // O
+      '#ff00e5', // T
+      '#39ff14', // S
+      '#ff1744', // Z
+      '#2979ff', // J
+      '#ff9100', // L
+      '#e0e0e0', // N
+    ],
+  },
+  pastel: {
+    colors: [
+      null,
+      '#a7d8de', // I
+      '#fff3b0', // O
+      '#d7bdf0', // T
+      '#b8e6c1', // S
+      '#f6b8b8', // Z
+      '#b8cef6', // J
+      '#f6d6a8', // L
+      '#d6d6e0', // N
+    ],
+  },
+  pixel: {
+    colors: [
+      null,
+      '#5cd6d6',
+      '#e6c229',
+      '#a259c6',
+      '#6fbf73',
+      '#d9534f',
+      '#7fa8e0',
+      '#e0964f',
+      '#9aa5ad',
+    ],
+  },
+};
+
+const SKIN_KEYS = Object.keys(SKINS);
+
 const THEME_COLORS = {
   dark: { grid: '#22222e', highlight: 'rgba(255,255,255,0.12)' },
   light: { grid: '#c5c9dc', highlight: 'rgba(255,255,255,0.4)' },
@@ -55,10 +102,28 @@ const resetRecordsBtn = document.getElementById('reset-records-btn');
 const nameForm = document.getElementById('name-form');
 const nameInput = document.getElementById('name-input');
 const saveScoreBtn = document.getElementById('save-score-btn');
+const skinSelect = document.getElementById('skin-select');
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
-let theme = localStorage.getItem('tetris-theme') === 'light' ? 'light' : 'dark';
+let theme = 'dark';
+try {
+  theme = localStorage.getItem('tetris-theme') === 'light' ? 'light' : 'dark';
+} catch (e) {
+  theme = 'dark';
+}
 let started = false;
+
+function loadStoredSkin() {
+  let stored = null;
+  try {
+    stored = localStorage.getItem('tetris-skin');
+  } catch (e) {
+    stored = null;
+  }
+  return SKIN_KEYS.includes(stored) ? stored : 'retro';
+}
+
+let skin = loadStoredSkin();
 
 function createBoard() {
   return Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
@@ -176,7 +241,7 @@ function updateHUD() {
 
 function drawBlock(context, x, y, colorIndex, size, alpha) {
   if (!colorIndex) return;
-  const color = COLORS[colorIndex];
+  const color = SKINS[skin].colors[colorIndex];
   context.globalAlpha = alpha ?? 1;
   context.fillStyle = color;
   context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
@@ -419,8 +484,31 @@ function applyTheme() {
 
 function toggleTheme() {
   theme = themeSwitch.checked ? 'light' : 'dark';
-  localStorage.setItem('tetris-theme', theme);
+  try {
+    localStorage.setItem('tetris-theme', theme);
+  } catch (e) {
+    // ignore storage errors
+  }
   applyTheme();
+}
+
+function applySkin() {
+  SKIN_KEYS.forEach(key => document.body.classList.remove(`skin-${key}`));
+  document.body.classList.add(`skin-${skin}`);
+  if (skinSelect) skinSelect.value = skin;
+  draw();
+  drawNext();
+}
+
+function changeSkin() {
+  const value = skinSelect.value;
+  skin = SKIN_KEYS.includes(value) ? value : 'retro';
+  try {
+    localStorage.setItem('tetris-skin', skin);
+  } catch (e) {
+    // ignore storage errors
+  }
+  applySkin();
 }
 
 function togglePause() {
@@ -470,6 +558,7 @@ function init() {
   spawn();
   updateHUD();
   applyTheme();
+  applySkin();
   overlay.classList.add('hidden');
   nameForm.classList.add('hidden');
   recordsPanel.innerHTML = '';
@@ -524,6 +613,8 @@ resetRecordsBtn.addEventListener('click', () => {
   renderRecords(recordsPanel);
   renderRecords(startRecordsPanel);
 });
+skinSelect.addEventListener('change', changeSkin);
 
 applyTheme();
+applySkin();
 renderRecords(startRecordsPanel);

@@ -44,6 +44,41 @@ body.light-theme {
   --restart-hover: #4d6fe0;
 }
 
+body.skin-neon {
+  --bg: #0a0a12;
+  --title-color: #00e5ff;
+  --board-border: #ff00e5;
+  --board-bg: #0d0d18;
+  --value-color: #00e5ff;
+  --overlay-title-color: #ff00e5;
+  --overlay-score-color: #00e5ff;
+  --restart-bg: #00e5ff;
+  --restart-text: #0a0a12;
+  --restart-hover: #6ef5ff;
+}
+
+body.skin-pastel {
+  --title-color: #b98fd8;
+  --board-border: #e6c4e6;
+  --value-color: #b98fd8;
+  --overlay-title-color: #f4a6a6;
+  --overlay-score-color: #b98fd8;
+  --restart-bg: #b98fd8;
+  --restart-text: #ffffff;
+  --restart-hover: #cba7e6;
+}
+
+body.skin-pixel {
+  --title-color: #ffd54f;
+  --board-border: #3a3a3a;
+  --value-color: #ffd54f;
+  --overlay-title-color: #ffd54f;
+  --overlay-score-color: #ffd54f;
+  --restart-bg: #ffd54f;
+  --restart-text: #1a1a1a;
+  --restart-hover: #ffe082;
+}
+
 body {
   background: var(--bg);
   color: var(--text);
@@ -119,6 +154,18 @@ body {
   border: 1px solid var(--board-border);
   background: var(--board-bg);
   border-radius: 4px;
+}
+
+/* ---- Skin select ---- */
+#skin-select {
+  background: var(--kbd-bg);
+  border: 1px solid var(--kbd-border);
+  color: var(--text);
+  font-size: 12px;
+  font-family: inherit;
+  border-radius: 4px;
+  padding: 4px 6px;
+  cursor: pointer;
 }
 
 /* ---- Theme switch ---- */

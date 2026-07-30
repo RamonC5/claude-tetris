@@ -66,15 +66,40 @@
       <div class="overlay-box">
         <p id="overlay-title">GAME OVER</p>
         <p id="overlay-score"></p>
-        <div id="name-form" class="name-form hidden">
-          <input type="text" id="name-input" maxlength="12" placeholder="Tu nombre" autocomplete="off" />
-          <button id="save-score-btn">Guardar</button>
+        <div id="gameover-actions" class="hidden">
+          <div id="name-form" class="name-form hidden">
+            <input type="text" id="name-input" maxlength="12" placeholder="Tu nombre" autocomplete="off" />
+            <button id="save-score-btn">Guardar</button>
+          </div>
+
+          <div id="records-panel"></div>
+
+          <button id="restart-btn" class="menu-btn">Reiniciar</button>
+          <button id="reset-records-btn">Resetear records</button>
         </div>
 
-        <div id="records-panel"></div>
+        <div id="pause-menu" class="pause-menu hidden">
+          <div id="pause-view-main" class="pause-view">
+            <button id="resume-btn" class="menu-btn">Reanudar</button>
+            <button id="pause-restart-btn" class="menu-btn">Reiniciar</button>
+            <button id="controls-btn" class="menu-btn secondary">Ver controles</button>
+            <div class="level-select-row">
+              <label for="start-level-select">Nivel inicial</label>
+              <select id="start-level-select" aria-label="Nivel inicial"></select>
+            </div>
+          </div>
 
-        <button id="restart-btn">Reiniciar</button>
-        <button id="reset-records-btn">Resetear records</button>
+          <div id="pause-view-controls" class="pause-view hidden">
+            <ul class="pause-controls-list">
+              <li><kbd>←</kbd><kbd>→</kbd> mover</li>
+              <li><kbd>↑</kbd> rotar</li>
+              <li><kbd>↓</kbd> bajar</li>
+              <li><kbd>Space</kbd> caída</li>
+              <li><kbd>P</kbd> pausa</li>
+            </ul>
+            <button id="back-btn" class="menu-btn secondary">Volver</button>
+          </div>
+        </div>
       </div>
     </div>
 

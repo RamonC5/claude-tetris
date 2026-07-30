@@ -52,6 +52,9 @@ const startRecordsPanel = document.getElementById('start-records-panel');
 const playBtn = document.getElementById('play-btn');
 const recordsPanel = document.getElementById('records-panel');
 const resetRecordsBtn = document.getElementById('reset-records-btn');
+const nameForm = document.getElementById('name-form');
+const nameInput = document.getElementById('name-input');
+const saveScoreBtn = document.getElementById('save-score-btn');
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
 let theme = localStorage.getItem('tetris-theme') === 'light' ? 'light' : 'dark';
@@ -236,6 +239,7 @@ function drawNext() {
 // ---- Records ----
 
 const RECORDS_KEY = 'tetris-highscores';
+const LAST_NAME_KEY = 'tetris-last-name';
 const MAX_RECORDS = 5;
 
 function defaultRecords() {
@@ -273,19 +277,19 @@ function loadRecords() {
   }
 }
 
-function saveRecord({ name, score, lines, level, combo, linesAtOnce }) {
+function saveRecord(entry) {
   const records = loadRecords();
   records.scores.push({
-    name: name || '---',
-    score: score || 0,
-    lines: lines || 0,
-    level: level || 1,
-    date: new Date().toISOString(),
+    name: entry.name || '---',
+    score: entry.score || 0,
+    lines: entry.lines || 0,
+    level: entry.level || 1,
+    date: entry.date || new Date().toISOString(),
   });
   records.scores.sort((a, b) => b.score - a.score);
   records.scores = records.scores.slice(0, MAX_RECORDS);
-  records.bestCombo = Math.max(records.bestCombo, combo || 0);
-  records.maxLines = Math.max(records.maxLines, linesAtOnce || 0);
+  records.bestCombo = Math.max(records.bestCombo, entry.combo || 0);
+  records.maxLines = Math.max(records.maxLines, entry.linesAtOnce || 0);
   try {
     localStorage.setItem(RECORDS_KEY, JSON.stringify(records));
   } catch (e) {
@@ -360,10 +364,50 @@ function endGame() {
   overlayScore.textContent = `Puntuación: ${score.toLocaleString()}`;
   overlay.classList.remove('hidden');
 
-  const combo = typeof maxCombo !== 'undefined' ? maxCombo : 0;
-  const linesAtOnce = typeof maxLinesAtOnce !== 'undefined' ? maxLinesAtOnce : 0;
-  saveRecord({ name: 'Jugador', score, lines, level, combo, linesAtOnce });
-  renderRecords(recordsPanel);
+  if (qualifiesForTop5(score)) {
+    nameForm.classList.remove('hidden');
+    let lastName = '';
+    try {
+      lastName = localStorage.getItem(LAST_NAME_KEY) || '';
+    } catch (e) {
+      lastName = '';
+    }
+    nameInput.value = lastName;
+    saveScoreBtn.disabled = false;
+
+    const handleSave = () => {
+      const name = nameInput.value.trim() || 'AAA';
+      const combo = typeof maxCombo !== 'undefined' ? maxCombo : 0;
+      const linesAtOnce = typeof maxLinesAtOnce !== 'undefined' ? maxLinesAtOnce : 0;
+      const entry = {
+        name,
+        score,
+        lines,
+        level,
+        date: new Date().toISOString(),
+        combo,
+        linesAtOnce,
+      };
+      const data = saveRecord(entry);
+      try {
+        localStorage.setItem(LAST_NAME_KEY, name);
+      } catch (e) {
+        // ignore
+      }
+      const highlightIndex = data.scores.findIndex(
+        e => e.date === entry.date && e.name === entry.name && e.score === entry.score
+      );
+      renderRecords(recordsPanel, highlightIndex >= 0 ? highlightIndex : undefined);
+      nameForm.classList.add('hidden');
+      saveScoreBtn.removeEventListener('click', handleSave);
+    };
+
+    saveScoreBtn.addEventListener('click', handleSave);
+    renderRecords(recordsPanel);
+  } else {
+    nameForm.classList.add('hidden');
+    renderRecords(recordsPanel);
+  }
 }
 
 function applyTheme() {
@@ -389,6 +433,8 @@ function togglePause() {
     cancelAnimationFrame(animId);
     overlayTitle.textContent = 'PAUSA';
     overlayScore.textContent = '';
+    nameForm.classList.add('hidden');
+    recordsPanel.innerHTML = '';
     overlay.classList.remove('hidden');
   }
 }
@@ -425,6 +471,8 @@ function init() {
   updateHUD();
   applyTheme();
   overlay.classList.add('hidden');
+  nameForm.classList.add('hidden');
+  recordsPanel.innerHTML = '';
   cancelAnimationFrame(animId);
   animId = requestAnimationFrame(loop);
 }
